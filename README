@@ -1,0 +1,15 @@
+h1. rss2muc
+
+A simple single user RSS to Jabber MUC gateway.
+
+<pre><code>
+ruby rss2muc config.yaml
+</code></pre>
+
+h2. Configuration
+
+YAML file containing RSS feeds to monitor.
+
+<pre><code>
+BBCSport: "http://newsrss.bbc.co.uk/rss/sportonline_uk_edition/front_page/rss.xml"
+</code></pre>
