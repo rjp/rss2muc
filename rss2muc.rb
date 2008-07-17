@@ -6,7 +6,7 @@ require 'sqlite3'
 feeds = []
 
 db = SQLite3::Database.new('feeds.db')
-db.execute('select url from feed') { |f|
+db.execute('select url from feeds') { |f|
     feeds.push f[0]
 }
 
