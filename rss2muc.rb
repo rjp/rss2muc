@@ -1,10 +1,11 @@
 require 'rubygems'
 require 'feed-normalizer'
 require 'open-uri'
-require 'sqlite3'
+require 'gdbm'
 require 'sha1'
 
-feeds = []
+feeds = GDBM.new('feeds.db')
+articles = GDBM.new('read.db')
 
 db = SQLite3::Database.new('feeds.db')
 
@@ -17,9 +18,7 @@ feeds.each { |feed_url, feed_last|
     feed = FeedNormalizer::FeedNormalizer.parse open(feed_url)
 	feed.entries.each { |f|
         sha1 = SHA1.hexdigest(f.title + f.url)
-        if feed_last == sha1 then
-            new_entries = []
-        else
+        unless articles[sha1] then
             new_entries.push f.title + " " + sha1
         end
 	}
