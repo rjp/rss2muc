@@ -18,6 +18,9 @@ feeds.each { |feed_info|
     start = start + 10
 }
 
+# move this out of the loop so we can thread synchronise it
+new_entries = []
+
 # TODO use a priority queue based on the time of next update for each URL
 loop {
     now = Time.now.to_i
@@ -28,13 +31,12 @@ loop {
     p feed_info, timestamp
     next_timestamp = timestamp + feed_info['refresh']
     feed_url = feed_info['url']
-    new_entries = []
     feed = FeedNormalizer::FeedNormalizer.parse open(feed_url)
 	feed.entries.each { |f|
         # do we care if the title changes?
         sha1 = SHA1.hexdigest(f.title + f.url)
         unless articles[sha1] then
-            new_entries.push f.title + " " + sha1
+            new_entries.push [f.title, f.url]
             articles[sha1] = f.title
         end
 	}
