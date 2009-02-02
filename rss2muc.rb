@@ -25,7 +25,9 @@ new_entries = []
 loop {
     now = Time.now.to_i
     feed_info, timestamp = pq.lowest(true)
+    puts "next: #{feed_info['name']}, at: #{Time.at(timestamp)}"
     if timestamp > now then
+        puts "- sleeping for #{timestamp-now}"
         sleep timestamp - now
     end
     p feed_info, timestamp
