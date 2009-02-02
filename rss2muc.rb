@@ -1,14 +1,16 @@
+require 'yaml'
 require 'rubygems'
 require 'feed-normalizer'
 require 'open-uri'
 require 'gdbm'
 require 'sha1'
 
-feeds = GDBM.new('feeds.db')
+feeds = YAML.load_file('feeds.yml')
 articles = GDBM.new('read.db')
 
 loop {
-	feeds.keys.each { |feed_url|
+	feeds.each { |feed_info|
+        feed_url = feed_info['url']
 	    new_entries = []
 	    feed = FeedNormalizer::FeedNormalizer.parse open(feed_url)
 		feed.entries.each { |f|
