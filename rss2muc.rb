@@ -45,4 +45,5 @@ loop {
     puts "will check #{feed_info['name']} again at #{Time.at(next_timestamp)}"
     pq.push(feed_info, next_timestamp)
     p new_entries
+    new_entries = []
 }
