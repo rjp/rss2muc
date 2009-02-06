@@ -7,7 +7,9 @@ require 'sha1'
 require 'time'
 require 'simple-ordered-list'
 
-feeds = YAML.load_file('feeds.yml')
+feedfile = ARGV[0] || 'feeds.yml'
+
+feeds = YAML.load_file(feedfile)
 articles = GDBM.new('read.db')
 
 pq = Queue::Priority.new()
