@@ -23,13 +23,15 @@ feeds.each { |feed_info|
 # move this out of the loop so we can thread synchronise it
 new_entries = []
 
+rss = Thread.new { 
+    puts "RSS producer alive"
 # TODO use a priority queue based on the time of next update for each URL
 loop {
     now = Time.now.to_i
     feed_info, timestamp = pq.lowest(true)
-    puts "next: #{feed_info['name']}, at: #{Time.at(timestamp)}"
+    puts "= next: #{feed_info['name']}, at: #{Time.at(timestamp)}"
     if timestamp > now then
-        puts "- sleeping for #{timestamp-now}"
+        puts "= sleeping for #{timestamp-now} for #{feed_info['name']}"
         sleep timestamp - now
     end
     p feed_info, timestamp
@@ -40,12 +42,26 @@ loop {
         # do we care if the title changes?
         sha1 = SHA1.hexdigest(f.title + f.url)
         unless articles[sha1] then
+            puts "+ #{f.title}"
             new_entries.push [f.title, f.url]
             articles[sha1] = f.title
         end
 	}
-    puts "will check #{feed_info['name']} again at #{Time.at(next_timestamp)}"
+    puts "= queued: #{feed_info['name']} at #{Time.at(next_timestamp)}"
     pq.push(feed_info, next_timestamp)
-    p new_entries
-    new_entries = []
 }
+}
+
+muc = Thread.new {
+    puts "MUC consumer alive"
+    loop {
+        if new_entries.size > 0 then
+            entry = new_entries.shift
+            puts "- #{entry[0]}"
+        end
+        sleep 2
+    }
+}
+
+rss.join
+muc.join
