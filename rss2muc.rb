@@ -6,6 +6,8 @@ require 'gdbm'
 require 'sha1'
 require 'time'
 require 'simple-ordered-list'
+require 'xmpp4r'
+require 'xmpp4r/muc/helper/simplemucclient'
 
 feedfile = ARGV[0] || 'feeds.yml'
 
@@ -13,6 +15,18 @@ feeds = YAML.load_file(feedfile)
 articles = GDBM.new('read.db')
 
 pq = Queue::Priority.new()
+
+joined = false
+cl = Jabber::Client.new(Jabber::JID.new(ARGV[1]))
+cl.connect
+cl.auth(ARGV[2])
+m = Jabber::MUC::SimpleMUCClient.new(cl)
+
+m.on_join { |time,nick|
+    joined = true
+}
+
+m.join(ARGV[3])
 
 start = Time.now.to_i + 10
 feeds.each { |feed_info|
@@ -49,7 +63,7 @@ loop {
             puts "! #{f.title}"
         else
             puts "+ #{f.title}"
-            new_entries.push [f.title, f.url]
+            new_entries.push [f.title, f.url, feed_info['name']]
         end
         articles[sha1] = now.to_s
 	}
@@ -65,8 +79,14 @@ muc = Thread.new {
         if new_entries.size > 0 then
             entry = new_entries.shift
             puts "- #{entry[0]}"
+            if joined then
+                t = "#{entry[2]}: #{entry[0]}\n#{entry[1]}"
+                m.say(t)
+            end
+            sleep 5
+        else
+            sleep 60
         end
-        sleep 2
     }
 }
 
