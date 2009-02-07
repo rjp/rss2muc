@@ -37,16 +37,23 @@ loop {
     p feed_info, timestamp
     next_timestamp = timestamp + feed_info['refresh']
     feed_url = feed_info['url']
+    seen_feed = articles[feed_url].to_i
+    if seen_feed == 0 then puts "= ignoring first run: #{feed_url}"; end
     feed = FeedNormalizer::FeedNormalizer.parse open(feed_url)
 	feed.entries.each { |f|
         # do we care if the title changes?
         sha1 = SHA1.hexdigest(f.title + f.url)
-        unless articles[sha1] then
+        if articles[sha1] then
+#            puts "r #{f.title}"
+        elsif seen_feed == 0 then
+            puts "! #{f.title}"
+        else
             puts "+ #{f.title}"
             new_entries.push [f.title, f.url]
             articles[sha1] = f.title
         end
 	}
+    articles[feed_url] = now.to_s
     puts "= queued: #{feed_info['name']} at #{Time.at(next_timestamp)}"
     pq.push(feed_info, next_timestamp)
 }
