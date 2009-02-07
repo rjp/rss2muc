@@ -50,8 +50,8 @@ loop {
         else
             puts "+ #{f.title}"
             new_entries.push [f.title, f.url]
-            articles[sha1] = f.title
         end
+        articles[sha1] = now.to_s
 	}
     articles[feed_url] = now.to_s
     puts "= queued: #{feed_info['name']} at #{Time.at(next_timestamp)}"
